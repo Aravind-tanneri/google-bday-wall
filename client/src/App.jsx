@@ -299,196 +299,204 @@ const App = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col xl:flex-row p-3 sm:p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full pt-20 sm:pt-24 md:pt-28 lg:pt-32">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col xl:flex-row items-start p-3 sm:p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full pt-20 sm:pt-24 md:pt-28 lg:pt-32">
         {/* Grid Container */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto relative flex flex-col items-center xl:justify-start">
+        <div className="flex-1 w-full bg-white rounded-xl shadow-sm border border-gray-200 relative flex flex-col items-center h-fit xl:self-start">
           <div className="p-2 sm:p-4 md:p-6 flex-shrink-0 w-full flex flex-col items-center">
             
             <div className="flex items-center justify-center w-full">
-              {/* The 100x100 Grid */}
+              {/* Relative wrapper strictly matching Grid size for accurate tooltip positioning */}
               <div
-                className="grid bg-gray-100 border border-gray-200 relative overflow-hidden"
+                className="relative"
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
-                  gridTemplateRows: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
                   width: 'min(800px, calc(100vw - 4rem), 78vh)',
                   height: 'min(800px, calc(100vw - 4rem), 78vh)',
                   maxWidth: '800px',
                   maxHeight: '800px'
                 }}
-                onMouseLeave={() => setHoveredSquare(null)}
               >
-                {/* Grid Content */}
-                {squares.map((square, i) => {
-                  const col = i % 100;
-                  const row = Math.floor(i / 100);
-                  const isTenthCol = (col + 1) % 10 === 0 && col !== 99;
-                  const isTenthRow = (row + 1) % 10 === 0 && row !== 99;
+                {/* The 100x100 Grid */}
+                <div
+                  className="grid bg-gray-100 border border-gray-200 relative overflow-hidden w-full h-full"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+                  }}
+                  onMouseLeave={() => setHoveredSquare(null)}
+                >
+                  {/* Grid Content */}
+                  {squares.map((square, i) => {
+                    const col = i % 100;
+                    const row = Math.floor(i / 100);
+                    const isTenthCol = (col + 1) % 10 === 0 && col !== 99;
+                    const isTenthRow = (row + 1) % 10 === 0 && row !== 99;
 
-                  const isHoverPreview = hoveredSquare !== null &&
-                    (col >= hoveredSquare % 100) && (col < (hoveredSquare % 100) + claimSize) &&
-                    (row >= Math.floor(hoveredSquare / 100)) && (row < Math.floor(hoveredSquare / 100) + claimSize);
+                    const isHoverPreview = hoveredSquare !== null &&
+                      (col >= hoveredSquare % 100) && (col < (hoveredSquare % 100) + claimSize) &&
+                      (row >= Math.floor(hoveredSquare / 100)) && (row < Math.floor(hoveredSquare / 100) + claimSize);
 
-                  const isSelectedPreview = selectedSquareIndex !== null &&
-                    (col >= selectedSquareIndex % 100) && (col < (selectedSquareIndex % 100) + claimSize) &&
-                    (row >= Math.floor(selectedSquareIndex / 100)) && (row < Math.floor(selectedSquareIndex / 100) + claimSize);
+                    const isSelectedPreview = selectedSquareIndex !== null &&
+                      (col >= selectedSquareIndex % 100) && (col < (selectedSquareIndex % 100) + claimSize) &&
+                      (row >= Math.floor(selectedSquareIndex / 100)) && (row < Math.floor(selectedSquareIndex / 100) + claimSize);
+
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => handleSquareClick(i)}
+                        onMouseEnter={() => setHoveredSquare(i)}
+                        className={`
+                      ${isTenthCol ? 'border-r border-r-gray-300/40' : 'border-r border-r-gray-200/25'}
+                      ${isTenthRow ? 'border-b border-b-gray-300/40' : 'border-b border-b-gray-200/25'}
+                      cursor-pointer flex items-center justify-center relative overflow-visible
+                      ${(isSelectedPreview || isHoverPreview) && (!square || (!square.name && !square.isCovered)) ? 'bg-blue-100/50' : 'hover:bg-gray-200/50'}
+                      ${square && (square.name || square.isCovered) ? 'bg-white cursor-not-allowed' : ''}
+                    `}
+                      >
+                        {/* Rough watermark number after every 10 cells in empty space */}
+                        {(!square || (!square.name && !square.isCovered)) && (
+                          <>
+                            {row === 0 && (col + 1) % 10 === 0 && (
+                              <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
+                                {col + 1}
+                              </span>
+                            )}
+                            {col === 0 && (row + 1) % 10 === 0 && row !== 0 && (
+                              <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
+                                {row + 1}
+                              </span>
+                            )}
+                            {row !== 0 && col !== 0 && (col + 1) % 10 === 0 && (row + 1) % 10 === 0 && (
+                              <span className="text-[4px] sm:text-[5px] text-gray-300 font-mono select-none pointer-events-none leading-none opacity-20">
+                                {col + 1}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      {/* Main Content Rendered Only on Top-Left Cell */}
+                      {square && square.name && (
+                        <div
+                          className="absolute top-0 left-0 z-10 pointer-events-none overflow-hidden"
+                          style={{
+                            width: `calc(${square.width * 100}% + ${square.width - 1}px)`,
+                            height: `calc(${square.height * 100}% + ${square.height - 1}px)`
+                          }}
+                        >
+                          {square.emoji && (
+                            <span className="flex items-center justify-center w-full h-full p-0.5 absolute inset-0">
+                              {square.emoji === 'google_icon' ? (
+                                <svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                </svg>
+                              ) : square.emoji.startsWith('http') ? (
+                                <img src={square.emoji} alt="preset" className="w-full h-full object-cover rounded-sm" />
+                              ) : (
+                                <div className="flex items-center justify-center w-full h-full text-center" style={{ fontSize: `clamp(8px, ${square.width * 6}px, 64px)` }}>
+                                  {square.emoji}
+                                </div>
+                              )}
+                            </span>
+                          )}
+                          {square.imageUrl && <img src={square.imageUrl} alt="wish" className="w-full h-full object-cover absolute inset-0" />}
+                        </div>
+                      )}
+
+                      {/* Selection Border Overlay */}
+                      {selectedSquareIndex === i && (
+                        <div
+                          className="absolute top-0 left-0 z-20 pointer-events-none ring-2 ring-blue-500 bg-blue-500/10"
+                          style={{
+                            width: `calc(${claimSize * 100}% + ${claimSize - 1}px)`,
+                            height: `calc(${claimSize * 100}% + ${claimSize - 1}px)`
+                          }}
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+
+                {/* Tinted Google Logo Mask Overlaid ABOVE the grid images */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 mix-blend-multiply z-30">
+                  <svg viewBox="0 0 24 24" className="w-[85%] h-[85%] sm:w-[90%] sm:h-[90%] max-w-full max-h-full" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                  </svg>
+                </div>
+                </div>
+
+                {/* Tooltips positioned relative to exact Grid bounds */}
+                {(() => {
+                  if (hoveredSquare === null || !squares[hoveredSquare]) return null;
+                  const activeWish = squares[hoveredSquare].isCovered 
+                    ? squares[squares[hoveredSquare].mainIndex] 
+                    : squares[hoveredSquare];
+                    
+                  if (!activeWish || !activeWish.name) return null;
 
                   return (
-                    <div
-                      key={i}
-                      onClick={() => handleSquareClick(i)}
-                      onMouseEnter={() => setHoveredSquare(i)}
-                      className={`
-                    ${isTenthCol ? 'border-r border-r-gray-300/40' : 'border-r border-r-gray-200/25'}
-                    ${isTenthRow ? 'border-b border-b-gray-300/40' : 'border-b border-b-gray-200/25'}
-                    cursor-pointer flex items-center justify-center relative overflow-visible
-                    ${(isSelectedPreview || isHoverPreview) && (!square || (!square.name && !square.isCovered)) ? 'bg-blue-100/50' : 'hover:bg-gray-200/50'}
-                    ${square && (square.name || square.isCovered) ? 'bg-white cursor-not-allowed' : ''}
-                  `}
-                    >
-                      {/* Rough watermark number after every 10 cells in empty space */}
-                      {(!square || (!square.name && !square.isCovered)) && (
-                        <>
-                          {row === 0 && (col + 1) % 10 === 0 && (
-                            <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
-                              {col + 1}
-                            </span>
-                          )}
-                          {col === 0 && (row + 1) % 10 === 0 && row !== 0 && (
-                            <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
-                              {row + 1}
-                            </span>
-                          )}
-                          {row !== 0 && col !== 0 && (col + 1) % 10 === 0 && (row + 1) % 10 === 0 && (
-                            <span className="text-[4px] sm:text-[5px] text-gray-300 font-mono select-none pointer-events-none leading-none opacity-20">
-                              {col + 1}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    {/* Main Content Rendered Only on Top-Left Cell */}
-                    {square && square.name && (
+                    <>
+                      {/* Desktop Tooltip */}
                       <div
-                        className="absolute top-0 left-0 z-10 pointer-events-none overflow-hidden"
-                        style={{
-                          width: `calc(${square.width * 100}% + ${square.width - 1}px)`,
-                          height: `calc(${square.height * 100}% + ${square.height - 1}px)`
-                        }}
+                        className="hidden md:block absolute bg-white p-3 rounded-lg shadow-xl border border-gray-100 z-50 pointer-events-none w-64"
+                        style={getTooltipStyle()}
                       >
-                        {square.emoji && (
-                          <span className="flex items-center justify-center w-full h-full p-0.5 absolute inset-0">
-                            {square.emoji === 'google_icon' ? (
-                              <svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                              </svg>
-                            ) : square.emoji.startsWith('http') ? (
-                              <img src={square.emoji} alt="preset" className="w-full h-full object-cover rounded-sm" />
-                            ) : (
-                              <div className="flex items-center justify-center w-full h-full text-center" style={{ fontSize: `clamp(8px, ${square.width * 6}px, 64px)` }}>
-                                {square.emoji}
-                              </div>
-                            )}
-                          </span>
-                        )}
-                        {square.imageUrl && <img src={square.imageUrl} alt="wish" className="w-full h-full object-cover absolute inset-0" />}
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="font-bold text-gray-800 text-base">{activeWish.name}</p>
+                          <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">#{activeWish.index + 1}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-1">Roll: {activeWish.rollNumber}</p>
+
+                        <div className="text-xs space-y-1 mt-2 border-t pt-2 border-gray-100">
+                          {activeWish.searchPersonality && <p><strong>Personality:</strong> {activeWish.searchPersonality}</p>}
+                          {activeWish.twoAmSearch && <p><strong>2 AM Search:</strong> {activeWish.twoAmSearch}</p>}
+                          {activeWish.randomSearch && <p><strong>Random:</strong> {activeWish.randomSearch}</p>}
+                          {activeWish.nitApSearch && <p><strong>NIT AP:</strong> {activeWish.nitApSearch}</p>}
+                          {activeWish.relationshipStatus && <p><strong>Status:</strong> {activeWish.relationshipStatus}</p>}
+                          {activeWish.birthdayWish && <p><strong>Wish:</strong> {activeWish.birthdayWish}</p>}
+                        </div>
                       </div>
-                    )}
 
-                    {/* Selection Border Overlay */}
-                    {selectedSquareIndex === i && (
-                      <div
-                        className="absolute top-0 left-0 z-20 pointer-events-none ring-2 ring-blue-500 bg-blue-500/10"
-                        style={{
-                          width: `calc(${claimSize * 100}% + ${claimSize - 1}px)`,
-                          height: `calc(${claimSize * 100}% + ${claimSize - 1}px)`
-                        }}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-
-              {/* Tinted Google Logo Mask Overlaid ABOVE the grid images */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 mix-blend-multiply z-30">
-                <svg viewBox="0 0 24 24" className="w-[85%] h-[85%] sm:w-[90%] sm:h-[90%] max-w-full max-h-full" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                </svg>
-              </div>
+                      {/* Mobile Tooltip (Fixed at bottom) */}
+                      <div className="md:hidden fixed bottom-4 left-4 right-4 bg-white p-4 rounded-xl shadow-2xl border border-gray-100 z-50 pointer-events-auto">
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="font-bold text-gray-800 text-lg">{activeWish.name}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">#{activeWish.index + 1}</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setHoveredSquare(null);
+                              }}
+                              className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                              aria-label="Close details"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-1">Roll: {activeWish.rollNumber}</p>
+                        <div className="text-sm space-y-1.5 mt-2 border-t pt-2 border-gray-100 max-h-[45vh] overflow-y-auto overscroll-contain">
+                          {activeWish.searchPersonality && <p><strong>Personality:</strong> {activeWish.searchPersonality}</p>}
+                          {activeWish.twoAmSearch && <p><strong>2 AM Search:</strong> {activeWish.twoAmSearch}</p>}
+                          {activeWish.randomSearch && <p><strong>Random:</strong> {activeWish.randomSearch}</p>}
+                          {activeWish.nitApSearch && <p><strong>NIT AP:</strong> {activeWish.nitApSearch}</p>}
+                          {activeWish.relationshipStatus && <p><strong>Status:</strong> {activeWish.relationshipStatus}</p>}
+                          {activeWish.birthdayWish && <p><strong>Wish:</strong> {activeWish.birthdayWish}</p>}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
-
-          {/* Tooltips */}
-          {(() => {
-            if (hoveredSquare === null || !squares[hoveredSquare]) return null;
-            const activeWish = squares[hoveredSquare].isCovered 
-              ? squares[squares[hoveredSquare].mainIndex] 
-              : squares[hoveredSquare];
-              
-            if (!activeWish || !activeWish.name) return null;
-
-            return (
-              <>
-                {/* Desktop Tooltip */}
-                <div
-                  className="hidden md:block absolute bg-white p-3 rounded-lg shadow-xl border border-gray-100 z-50 pointer-events-none w-64"
-                  style={getTooltipStyle()}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <p className="font-bold text-gray-800 text-base">{activeWish.name}</p>
-                    <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">#{activeWish.index + 1}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mb-1">Roll: {activeWish.rollNumber}</p>
-
-                  <div className="text-xs space-y-1 mt-2 border-t pt-2 border-gray-100">
-                    {activeWish.searchPersonality && <p><strong>Personality:</strong> {activeWish.searchPersonality}</p>}
-                    {activeWish.twoAmSearch && <p><strong>2 AM Search:</strong> {activeWish.twoAmSearch}</p>}
-                    {activeWish.randomSearch && <p><strong>Random:</strong> {activeWish.randomSearch}</p>}
-                    {activeWish.nitApSearch && <p><strong>NIT AP:</strong> {activeWish.nitApSearch}</p>}
-                    {activeWish.relationshipStatus && <p><strong>Status:</strong> {activeWish.relationshipStatus}</p>}
-                    {activeWish.birthdayWish && <p><strong>Wish:</strong> {activeWish.birthdayWish}</p>}
-                  </div>
-                </div>
-
-                {/* Mobile Tooltip (Fixed at bottom) */}
-                <div className="md:hidden fixed bottom-4 left-4 right-4 bg-white p-4 rounded-xl shadow-2xl border border-gray-100 z-50 pointer-events-auto">
-                  <div className="flex justify-between items-start mb-1">
-                    <p className="font-bold text-gray-800 text-lg">{activeWish.name}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">#{activeWish.index + 1}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHoveredSquare(null);
-                        }}
-                        className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                        aria-label="Close details"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-1">Roll: {activeWish.rollNumber}</p>
-                  <div className="text-sm space-y-1.5 mt-2 border-t pt-2 border-gray-100 max-h-[45vh] overflow-y-auto overscroll-contain">
-                    {activeWish.searchPersonality && <p><strong>Personality:</strong> {activeWish.searchPersonality}</p>}
-                    {activeWish.twoAmSearch && <p><strong>2 AM Search:</strong> {activeWish.twoAmSearch}</p>}
-                    {activeWish.randomSearch && <p><strong>Random:</strong> {activeWish.randomSearch}</p>}
-                    {activeWish.nitApSearch && <p><strong>NIT AP:</strong> {activeWish.nitApSearch}</p>}
-                    {activeWish.relationshipStatus && <p><strong>Status:</strong> {activeWish.relationshipStatus}</p>}
-                    {activeWish.birthdayWish && <p><strong>Wish:</strong> {activeWish.birthdayWish}</p>}
-                  </div>
-                </div>
-              </>
-            );
-          })()}
         </div>
 
         {/* Sidebar */}
