@@ -331,7 +331,7 @@ const App = () => {
                     {/* Main Content Rendered Only on Top-Left Cell */}
                     {square && square.name && (
                       <div
-                        className="absolute top-0 left-0 z-10 pointer-events-none"
+                        className="absolute top-0 left-0 z-10 pointer-events-none overflow-hidden"
                         style={{
                           width: `calc(${square.width * 100}% + ${square.width - 1}px)`,
                           height: `calc(${square.height * 100}% + ${square.height - 1}px)`
@@ -355,7 +355,7 @@ const App = () => {
                             )}
                           </span>
                         )}
-                        {square.imageUrl && <img src={square.imageUrl} alt="wish" className="w-full h-full object-contain absolute inset-0" />}
+                        {square.imageUrl && <img src={square.imageUrl} alt="wish" className="w-full h-full object-cover absolute inset-0" />}
                       </div>
                     )}
 
@@ -634,7 +634,7 @@ const App = () => {
                 <Heart className="w-5 h-5 text-red-500 shrink-0 mt-0.5 fill-red-500" />
                 <div>
                   <p className="font-bold text-sm">
-                    {squares.filter(s => s !== null).length.toLocaleString()}
+                    {squares.filter(s => s && s.name).length.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500">birthday wishes</p>
                 </div>
