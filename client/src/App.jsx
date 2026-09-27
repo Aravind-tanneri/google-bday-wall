@@ -217,7 +217,7 @@ const App = () => {
       <Toaster position="top-center" />
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 fixed top-0 left-0 w-full z-50 shadow-sm transition-all">
-        <div className="w-full max-w-[1600px] mx-auto flex flex-row items-center justify-center lg:justify-between relative px-6 md:px-12 xl:px-20 py-2">
+        <div className="w-full max-w-[1600px] mx-auto flex flex-row items-center justify-between relative px-3 sm:px-6 md:px-12 xl:px-20 py-2">
 
           {/* Top Left Decoration Image */}
           <div className="hidden lg:flex flex-1 max-w-[200px] xl:max-w-[280px] 2xl:max-w-[350px] items-center pointer-events-none">
@@ -225,29 +225,29 @@ const App = () => {
           </div>
 
           {/* Center Content */}
-          <div className="flex flex-row items-center justify-center flex-1 z-10 px-4 w-full gap-8 lg:gap-16">
+          <div className="flex flex-row items-center justify-between lg:justify-center flex-1 z-10 px-1 sm:px-4 w-full gap-2 sm:gap-6 lg:gap-16">
 
             {/* Logo and Title */}
-            <div className="flex flex-col items-center lg:items-start text-center lg:text-left shrink-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h1 className="text-2xl md:text-4xl font-bold tracking-tight">
+            <div className="flex flex-col items-start lg:items-start text-left shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
+                <h1 className="text-lg sm:text-2xl md:text-4xl font-bold tracking-tight">
                   <span className="text-blue-500">G</span>
                   <span className="text-red-500">o</span>
                   <span className="text-yellow-500">o</span>
                   <span className="text-blue-500">g</span>
                   <span className="text-green-500">l</span>
                   <span className="text-red-500">e</span>
-                  <span className="ml-2 text-gray-700">Birthday Wall</span>
+                  <span className="ml-1.5 sm:ml-2 text-gray-700">Birthday Wall</span>
                 </h1>
-                <Gift className="text-yellow-400 w-7 h-7 hidden xl:block" />
+                <Gift className="text-yellow-400 w-5 h-5 sm:w-7 sm:h-7 hidden sm:block" />
               </div>
-              <div className="text-xs md:text-sm font-semibold text-gray-400 tracking-wider uppercase">
+              <div className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 tracking-wider uppercase">
                 GDSC • NIT Andhra Pradesh
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-row gap-3 items-center justify-end shrink-0">
+            <div className="flex flex-row gap-2 sm:gap-3 items-center justify-end shrink-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -272,14 +272,14 @@ const App = () => {
               </form>
 
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors whitespace-nowrap text-sm"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full font-medium flex items-center gap-1.5 sm:gap-2 shadow-sm transition-colors whitespace-nowrap text-xs sm:text-sm"
                 onClick={() => {
                   document.getElementById('claim-section')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                <Edit2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Claim Square</span>
-                <span className="sm:hidden">Claim</span>
+                <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Claim</span>
+                <span className="hidden sm:inline">Square</span>
               </button>
             </div>
           </div>
@@ -293,22 +293,25 @@ const App = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col xl:flex-row p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full pt-44 md:pt-40">
+      <main className="flex-1 flex flex-col xl:flex-row p-3 sm:p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full pt-20 sm:pt-24 md:pt-28 lg:pt-32">
         {/* Grid Container */}
         <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto relative flex flex-col items-center xl:justify-start">
-          <div className="p-4 md:p-8 flex-shrink-0">
+          <div className="p-2 sm:p-4 md:p-8 flex-shrink-0 w-full flex justify-center">
             <div
               className="grid bg-gray-100 border border-gray-200 relative overflow-hidden"
               style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
                 gridTemplateRows: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
-                width: '800px', // Fixed size to maintain aspect ratio
-                height: '800px'
+                width: 'min(800px, calc(100vw - 2.5rem), 80vh)',
+                height: 'min(800px, calc(100vw - 2.5rem), 80vh)',
+                maxWidth: '800px',
+                maxHeight: '800px'
               }}
               onMouseLeave={() => setHoveredSquare(null)}
             >
-              {/* Grid Content */}              {squares.map((square, i) => {
+              {/* Grid Content */}
+              {squares.map((square, i) => {
                 const isHoverPreview = hoveredSquare !== null &&
                   (i % 100 >= hoveredSquare % 100) && (i % 100 < (hoveredSquare % 100) + claimSize) &&
                   (Math.floor(i / 100) >= Math.floor(hoveredSquare / 100)) && (Math.floor(i / 100) < Math.floor(hoveredSquare / 100) + claimSize);
@@ -375,7 +378,7 @@ const App = () => {
 
               {/* Tinted Google Logo Mask Overlaid ABOVE the grid images */}
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 mix-blend-multiply z-30">
-                <svg viewBox="0 0 24 24" width="90%" height="90%" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 24 24" className="w-[85%] h-[85%] sm:w-[90%] sm:h-[90%] max-w-full max-h-full" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
