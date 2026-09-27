@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Edit2, Image as ImageIcon, Heart, Star, Cloud, Gift, Camera, Upload } from 'lucide-react';
+import { Search, Edit2, Image as ImageIcon, Heart, Star, Cloud, Gift, Camera, Upload, X } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const GRID_SIZE = 100;
@@ -112,6 +112,12 @@ const App = () => {
   };
 
   const handleSquareClick = (index) => {
+    const clickedSquare = squares[index];
+    if (clickedSquare && (clickedSquare.name || clickedSquare.isCovered)) {
+      setHoveredSquare(index);
+      return;
+    }
+
     const startCol = index % 100;
     const startRow = Math.floor(index / 100);
 
@@ -296,41 +302,71 @@ const App = () => {
       <main className="flex-1 flex flex-col xl:flex-row p-3 sm:p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full pt-20 sm:pt-24 md:pt-28 lg:pt-32">
         {/* Grid Container */}
         <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto relative flex flex-col items-center xl:justify-start">
-          <div className="p-2 sm:p-4 md:p-8 flex-shrink-0 w-full flex justify-center">
-            <div
-              className="grid bg-gray-100 border border-gray-200 relative overflow-hidden"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
-                gridTemplateRows: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
-                width: 'min(800px, calc(100vw - 2.5rem), 80vh)',
-                height: 'min(800px, calc(100vw - 2.5rem), 80vh)',
-                maxWidth: '800px',
-                maxHeight: '800px'
-              }}
-              onMouseLeave={() => setHoveredSquare(null)}
-            >
-              {/* Grid Content */}
-              {squares.map((square, i) => {
-                const isHoverPreview = hoveredSquare !== null &&
-                  (i % 100 >= hoveredSquare % 100) && (i % 100 < (hoveredSquare % 100) + claimSize) &&
-                  (Math.floor(i / 100) >= Math.floor(hoveredSquare / 100)) && (Math.floor(i / 100) < Math.floor(hoveredSquare / 100) + claimSize);
+          <div className="p-2 sm:p-4 md:p-6 flex-shrink-0 w-full flex flex-col items-center">
+            
+            <div className="flex items-center justify-center w-full">
+              {/* The 100x100 Grid */}
+              <div
+                className="grid bg-gray-100 border border-gray-200 relative overflow-hidden"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+                  gridTemplateRows: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+                  width: 'min(800px, calc(100vw - 4rem), 78vh)',
+                  height: 'min(800px, calc(100vw - 4rem), 78vh)',
+                  maxWidth: '800px',
+                  maxHeight: '800px'
+                }}
+                onMouseLeave={() => setHoveredSquare(null)}
+              >
+                {/* Grid Content */}
+                {squares.map((square, i) => {
+                  const col = i % 100;
+                  const row = Math.floor(i / 100);
+                  const isTenthCol = (col + 1) % 10 === 0 && col !== 99;
+                  const isTenthRow = (row + 1) % 10 === 0 && row !== 99;
 
-                const isSelectedPreview = selectedSquareIndex !== null &&
-                  (i % 100 >= selectedSquareIndex % 100) && (i % 100 < (selectedSquareIndex % 100) + claimSize) &&
-                  (Math.floor(i / 100) >= Math.floor(selectedSquareIndex / 100)) && (Math.floor(i / 100) < Math.floor(selectedSquareIndex / 100) + claimSize);
+                  const isHoverPreview = hoveredSquare !== null &&
+                    (col >= hoveredSquare % 100) && (col < (hoveredSquare % 100) + claimSize) &&
+                    (row >= Math.floor(hoveredSquare / 100)) && (row < Math.floor(hoveredSquare / 100) + claimSize);
 
-                return (
-                  <div
-                    key={i}
-                    onClick={() => handleSquareClick(i)}
-                    onMouseEnter={() => setHoveredSquare(i)}
-                    className={`
-                  border-r border-b border-gray-200/50 cursor-pointer flex items-center justify-center relative overflow-visible
-                  ${(isSelectedPreview || isHoverPreview) && (!square || (!square.name && !square.isCovered)) ? 'bg-blue-100/50' : 'hover:bg-gray-200/50'}
-                  ${square && (square.name || square.isCovered) ? 'bg-white cursor-not-allowed' : ''}
-                `}
-                  >
+                  const isSelectedPreview = selectedSquareIndex !== null &&
+                    (col >= selectedSquareIndex % 100) && (col < (selectedSquareIndex % 100) + claimSize) &&
+                    (row >= Math.floor(selectedSquareIndex / 100)) && (row < Math.floor(selectedSquareIndex / 100) + claimSize);
+
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => handleSquareClick(i)}
+                      onMouseEnter={() => setHoveredSquare(i)}
+                      className={`
+                    ${isTenthCol ? 'border-r border-r-gray-300/40' : 'border-r border-r-gray-200/25'}
+                    ${isTenthRow ? 'border-b border-b-gray-300/40' : 'border-b border-b-gray-200/25'}
+                    cursor-pointer flex items-center justify-center relative overflow-visible
+                    ${(isSelectedPreview || isHoverPreview) && (!square || (!square.name && !square.isCovered)) ? 'bg-blue-100/50' : 'hover:bg-gray-200/50'}
+                    ${square && (square.name || square.isCovered) ? 'bg-white cursor-not-allowed' : ''}
+                  `}
+                    >
+                      {/* Rough watermark number after every 10 cells in empty space */}
+                      {(!square || (!square.name && !square.isCovered)) && (
+                        <>
+                          {row === 0 && (col + 1) % 10 === 0 && (
+                            <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
+                              {col + 1}
+                            </span>
+                          )}
+                          {col === 0 && (row + 1) % 10 === 0 && row !== 0 && (
+                            <span className="text-[5px] sm:text-[6px] text-gray-400 font-mono select-none pointer-events-none leading-none opacity-25">
+                              {row + 1}
+                            </span>
+                          )}
+                          {row !== 0 && col !== 0 && (col + 1) % 10 === 0 && (row + 1) % 10 === 0 && (
+                            <span className="text-[4px] sm:text-[5px] text-gray-300 font-mono select-none pointer-events-none leading-none opacity-20">
+                              {col + 1}
+                            </span>
+                          )}
+                        </>
+                      )}
                     {/* Main Content Rendered Only on Top-Left Cell */}
                     {square && square.name && (
                       <div
@@ -385,6 +421,7 @@ const App = () => {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
               </div>
+              </div>
             </div>
           </div>
 
@@ -421,13 +458,26 @@ const App = () => {
                 </div>
 
                 {/* Mobile Tooltip (Fixed at bottom) */}
-                <div className="md:hidden fixed bottom-4 left-4 right-4 bg-white p-4 rounded-xl shadow-2xl border border-gray-100 z-50 pointer-events-none">
+                <div className="md:hidden fixed bottom-4 left-4 right-4 bg-white p-4 rounded-xl shadow-2xl border border-gray-100 z-50 pointer-events-auto">
                   <div className="flex justify-between items-start mb-1">
                     <p className="font-bold text-gray-800 text-lg">{activeWish.name}</p>
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">#{activeWish.index + 1}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">#{activeWish.index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHoveredSquare(null);
+                        }}
+                        className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        aria-label="Close details"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-sm text-gray-500 mb-1">Roll: {activeWish.rollNumber}</p>
-                  <div className="text-sm space-y-1 mt-2 border-t pt-2 border-gray-100 max-h-40 overflow-y-auto">
+                  <div className="text-sm space-y-1.5 mt-2 border-t pt-2 border-gray-100 max-h-[45vh] overflow-y-auto overscroll-contain">
                     {activeWish.searchPersonality && <p><strong>Personality:</strong> {activeWish.searchPersonality}</p>}
                     {activeWish.twoAmSearch && <p><strong>2 AM Search:</strong> {activeWish.twoAmSearch}</p>}
                     {activeWish.randomSearch && <p><strong>Random:</strong> {activeWish.randomSearch}</p>}
@@ -471,7 +521,7 @@ const App = () => {
                   <label className="text-xs font-bold text-gray-700 block mb-1">Student Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="Your Name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -481,7 +531,7 @@ const App = () => {
                   <label className="text-xs font-bold text-gray-700 block mb-1">Roll Number <span className="text-red-500">*</span></label>
                   <input
                     type="text"
-                    placeholder="4123xx"
+                    placeholder="425xxx"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     value={formData.rollNumber}
                     onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
