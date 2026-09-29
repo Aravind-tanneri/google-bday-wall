@@ -46,6 +46,7 @@ const App = () => {
   // Fetch initial data
   React.useEffect(() => {
     const fetchWishes = async () => {
+      const toastId = toast.loading('Fetching wishes from the sleepy server...', { duration: 10000 });
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const res = await fetch(`${API_URL}/api/wishes`);
@@ -86,9 +87,13 @@ const App = () => {
             });
             return newSquares;
           });
+          toast.success('Wishes loaded!', { id: toastId });
+        } else {
+          toast.error('Failed to load wishes', { id: toastId });
         }
       } catch (err) {
         console.error('Failed to fetch wishes', err);
+        toast.error('Server is sleeping deeply...', { id: toastId });
       }
     };
     fetchWishes();
@@ -350,6 +355,7 @@ const App = () => {
                       ${isTenthCol ? 'border-r border-r-gray-300/40' : 'border-r border-r-gray-200/25'}
                       ${isTenthRow ? 'border-b border-b-gray-300/40' : 'border-b border-b-gray-200/25'}
                       cursor-pointer flex items-center justify-center relative overflow-visible
+                      ${square && square.name ? 'z-20' : ''}
                       ${(isSelectedPreview || isHoverPreview) && (!square || (!square.name && !square.isCovered)) ? 'bg-blue-100/50' : 'hover:bg-gray-200/50'}
                       ${square && (square.name || square.isCovered) ? 'bg-white cursor-not-allowed' : ''}
                     `}
@@ -401,7 +407,7 @@ const App = () => {
                               )}
                             </span>
                           )}
-                          {square.imageUrl && <img src={square.imageUrl} alt="wish" className="w-full h-full object-cover absolute inset-0" />}
+                          {square.imageUrl && <img src={square.imageUrl} alt="wish" loading="lazy" decoding="async" className="w-full h-full object-cover absolute inset-0" />}
                         </div>
                       )}
 
@@ -419,7 +425,7 @@ const App = () => {
                   )
                 })}
 
-                {/* Tinted Google Logo Mask Overlaid ABOVE the grid images */}
+                {/* Tinted Google Logo Mask Overlaid ABOVE the grid images
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 mix-blend-multiply z-30">
                   <svg viewBox="0 0 24 24" className="w-[85%] h-[85%] sm:w-[90%] sm:h-[90%] max-w-full max-h-full" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -428,6 +434,7 @@ const App = () => {
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
                 </div>
+                */}
                 </div>
 
                 {/* Tooltips positioned relative to exact Grid bounds */}

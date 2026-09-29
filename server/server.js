@@ -45,6 +45,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/google-bd
 app.get('/api/wishes', async (req, res) => {
   try {
     const wishes = await Wish.find({});
+    // Sort wishes so that spam bot rolls ('999999', '111111') come FIRST
+    // and genuine entries come LAST (so they overwrite spam on the frontend)
+    wishes.sort((a, b) => {
+      const aIsSpam = (a.rollNumber === '999999' || a.rollNumber === '111111');
+      const bIsSpam = (b.rollNumber === '999999' || b.rollNumber === '111111');
+      if (aIsSpam && !bIsSpam) return -1;
+      if (!aIsSpam && bIsSpam) return 1;
+      return 0;
+    });
     res.json(wishes);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch wishes' });
@@ -62,7 +71,18 @@ app.post('/api/wishes', parser.single('image'), async (req, res) => {
     // Check if square is already taken
     const existing = await Wish.findOne({ index: parseInt(index) });
     if (existing) {
+      if (req.file) await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
       return res.status(400).json({ error: 'Square is already taken' });
+    }
+
+    // Limit to max 2 wishes per roll number to prevent automated spam
+    const trimmedRoll = rollNumber?.trim();
+    if (trimmedRoll && !['admin'].includes(trimmedRoll.toLowerCase())) {
+      const userWishesCount = await Wish.countDocuments({ rollNumber: new RegExp(`^${trimmedRoll}$`, 'i') });
+      if (userWishesCount >= 2) {
+        if (req.file) await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
+        return res.status(400).json({ error: 'You have already claimed the maximum of 2 squares for this roll number.' });
+      }
     }
 
     const newWish = new Wish({
@@ -96,19 +116,19 @@ app.get('/ping', (req, res) => {
 });
 
 // Self-ping every 14 minutes (14 * 60 * 1000 = 840000 ms)
-const PING_INTERVAL = 14 * 60 * 1000;
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+// const PING_INTERVAL = 14 * 60 * 1000;
+// const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 
-setInterval(async () => {
-  try {
-    const res = await fetch(`${SERVER_URL}/ping`);
-    if (res.ok) {
-      console.log(`Pinged server at ${new Date().toISOString()}`);
-    }
-  } catch (err) {
-    console.error('Failed to ping server:', err.message);
-  }
-}, PING_INTERVAL);
+// setInterval(async () => {
+//   try {
+//     const res = await fetch(`${SERVER_URL}/ping`);
+//     if (res.ok) {
+//       console.log(`Pinged server at ${new Date().toISOString()}`);
+//     }
+//   } catch (err) {
+//     console.error('Failed to ping server:', err.message);
+//   }
+// }, PING_INTERVAL);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
